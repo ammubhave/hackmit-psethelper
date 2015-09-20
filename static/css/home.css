@@ -1,0 +1,18 @@
+.center{
+	text-align: center;
+	
+}
+.top-bar.bar{
+	background-color: #A31F34;
+}
+.greet{
+	padding-top: 20%;
+	font-size: 3em;
+}
+li.has-dropdown.not-click{
+	background-color: #A31F34;
+}
+.bordered{
+	border-style: solid;
+	border-width: 1px;
+}
