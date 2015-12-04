@@ -24,22 +24,21 @@ def create(request):
         return render_to_response('create.html', {'user': request.user})
     else:
         class_for = request.POST['class_for']
-        short_description = request.POST['short_description']
         description = request.POST['description']
         location = request.POST['location']
         start_datetime = dateparse.parse_datetime(request.POST['start_datetime'])
         end_datetime = dateparse.parse_datetime(request.POST['end_datetime'])
-        party = Party.objects.create(organizer=request.user, class_for=class_for, short_description=short_description, decription=description, location=location, start_datetime=start_datetime, end_datetime=end_datetime)
-        return redirect('/monitor?id=' + str(party))
+        party = Party.objects.create(organizer=request.user, class_for=class_for, description=description, location=location, start_datetime=start_datetime, end_datetime=end_datetime, short_description=description)
+        return redirect('/monitor?id=' + str(party.id))
 
 @login_required
 def monitor(request):
-    party = Party.objects.get(id=request.GET['id'], organizer=request.user.username)
+    party = Party.objects.get(id=request.GET['id'], organizer=request.user.id)
     if request.method == 'GET':
         party_requests = PartyRequest.objects.filter(party=party.id).order_by('approved')
         return render_to_response('monitor.html', {'user': request.user, 'party': party, 'party_requests': party_requests})
     else:
-        party_request = PartyRequest.objects.get(id=request.POST['request_id'])
+        party_request = PartyRequest.objects.get(id=int(request.POST['request_id']))
         if 'approved' in request.POST:
             party_request.approved = True
             party_request.save()
@@ -48,7 +47,7 @@ def monitor(request):
 @login_required
 def ask(request):
     party = Party.objects.get(id=request.GET['id'])
-    party_request = PartyRequest.objects.filter(party=party.id, requestor=request.user.username)
+    party_request = PartyRequest.objects.filter(party=party.id, requestor=request.user.id)
     if (len(party_request) > 0):
         party_request = party_request[0]
     else:
@@ -57,6 +56,6 @@ def ask(request):
         return render_to_response('ask.html', {'user': request.user, 'party': party,'party_request': party_request})
     else:
         if party_request is None:
-            party_request = PartyRequest.objects.create(party=party, requestor=request.user)
+            party_request = PartyRequest.objects.create(party=party, requestor=request.user, request_datetime=datetime.now())
         return redirect('/ask?id=' + request.GET['id'])
 

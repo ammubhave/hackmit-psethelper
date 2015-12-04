@@ -22,5 +22,6 @@ urlpatterns = [
     url(r'^search$', views.search),
     url(r'^create$', views.create),
     url(r'^monitor$', views.monitor),
+    url(r'^ask$', views.ask),
     url(r'^admin/', include(admin.site.urls)),
 ]

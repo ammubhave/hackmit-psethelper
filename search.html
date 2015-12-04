@@ -1,57 +1,173 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <div class="body row">
-      <div class="center">
-        <h2>
-          Ongoing Parties for {{q}}
-        </h2>
-        <a href="/create" class="button radius">+ Create a new party</a>
-      </div>
-      <div class="small-12 large-10 large-offset-1 columns">
-      <!-- <table>
-        {% for item in results %}
-          <tr>
-            <td>
-              {{item.location}}
-            </td>
-            <td>
-              {{item.start_datetime}} - {{item.end_datetime}}
-            </td>
-            
-            <td>
-              {% for people in item.participants %}
-                {people}
-                </br>
-              {% endfor %}
-            </td>
-            <td>
-              {{item.organizer}}
-            </td>
-            <td>
-              <a href="#">Join</a>
-            </td>
-          </tr>
-        {% endfor %}
-      </table> -->
-        {% for item in results %}
-        <div class="row bordered">
-          <div class="small-2 columns">
-            {{item.location}}
-          </div>
-          <div class="small-3 columns">
-            {{item.start_datetime}}
-          </div>
-          <div class="small-3 columns">
-            {{item.end_datetime}}
-          </div>
-          <div class="small-4 columns">
-            {{item.organizer}}
-          </div>
-        </div>
-        {% endfor %}
+  <script src="https://maps.google.com/maps/api/js?sensor=false" 
+          type="text/javascript"></script>
+  <a href="#" id="show" class="show-for-small-only center button small radius">Course {{q}} Groups</a>
+  <a href="#" id="show" class="show-for-medium-up center button small radius">Showing groups for Course {{q}}</a>
+  <a href="/create" id="create" class="center button small">+ Create a new group</a>
+  <div id="map"></div>
 
-      </div>
-    </div>
+  <script type="text/javascript">
+    
+      var places = [
+                      ["Department of Civil and Environmental Engineering 1",42.3581532,-71.0925478],
+                      ["Maseeh Hall W1",42.3576901,-71.0934895],
+                      ["Rotch library 7",42.359464,-71.0932875],
+                      ["Simmons Hall W79",42.3571074,-71.1015162],
+                      ["Next House W71",42.354706,-71.1018345],
+                      ["Burton Conner W51",42.3559048,-71.0983241],
+                      ["MacGregor House W61",42.3553372,-71.0994406],
+                      ["McCormick Hall W4",42.3570819,-71.094371],
+                      ["New House W70",42.3551481,-71.1006052],
+                      ["East Campus",42.3602568,-71.0883741],
+                      ["Senior Haus E2",42.3600161,-71.0870211],
+                      ["Baker House W7",42.3567807,-71.0957633],
+                      ["Random Hall NW61",42.361846,-71.0983032],
+                      ["Hayden Library 14",42.359464,-71.0932875],
+                      ["Dewey library E53",42.3590321,-71.0894482],
+                      ["Music library 14",42.359367,-71.0890285],
+                      ["Barker Engineering Library 10",42.3596877,-71.0920681],
+                      ["Stratton student center W20",42.359014,-71.0947224],
+                      ["Stata Center 32",42.3616095,-71.0906355],
+                      ["Media lab E14",42.3608561,-71.0877253]
+                    ];
+      var locations = [];
+      
+      var coordsNow = [], X = [], Y = [], content = [];
+      var parties = [ {% for item in results %} "{{item.location}}" , {% endfor %} ];
+      var notes = [ {% for item in results %} 
+      "<strong>{{item.location}}</strong> </br> {{item.start_datetime}} to </br> {{item.end_datetime}} </br>By <strong>{{item.organizer}}</strong> </br> {% if item.organizer.id == user.id %}<a href=\"/monitor?id={{item.id}}\">Manage</a>{% endif %} {% if item.organizer.id != user.id %}<a href=\"/ask?id={{item.id}}\">Join</a>{% endif %}" , 
+      {% endfor %} ];
+      for (var i = parties.length - 1; i >= 0; i--) {
+        var Xnow = 0, Ynow = 0;
+        for (var j = places.length - 1; j >= 0; j--) {
+          place = places[j][0].toLowerCase();
+          party = parties[i].toLowerCase();
+          var re = /( |-)/;
+          var res = party.split(re);
+          if ( place.indexOf( res[0] ) > -1 )
+          {
+            Xnow = places[j][1];
+            Ynow = places[j][2];
+          }
+        }
+        X[i] = Xnow;
+        Y[i] = Ynow;
+        console.log(X[i], Y[i]);
+      };
+    // for (var i = locations.length - 1; i >= 0; i--) {
+    //   for (var j = locations.length - 1; j > i; j--) {
+    //     if ( locations[i][2] == locations[j][2] && locations[i][3] == locations[j][3]) {
+    //       locations[j][0] = locations[j][0].concat( "</br>".concat( locations[i][0] ));
+    //     };
+    //   };
+    // };
 
+    var map = new google.maps.Map(document.getElementById('map'), {
+      zoom: 16,
+      center: new google.maps.LatLng(42.3590029,-71.0951613),
+      mapTypeId: google.maps.MapTypeId.ROADMAP
+    });
+
+    var infowindow = new google.maps.InfoWindow();
+
+    var marker, i;
+
+    for (i = 0; i < parties.length; i++) {  
+      marker = new google.maps.Marker({
+        position: new google.maps.LatLng(X[i], Y[i]),
+        disableDefaultUI: true,
+        map: map
+      });
+
+      google.maps.event.addListener(marker, 'click', (function(marker, i) {
+        return function() {
+          infowindow.setContent(notes[i]);
+          infowindow.open(map, marker);
+        }
+      })(marker, i));
+    }
+  </script>
+  <style type="text/css">
+    #map {
+    margin-top: 5%;
+    height: 95%;
+    width: 100%;
+    left: 0;
+    position: absolute;
+    top: 0; 
+    }   
+    #create{
+      position:fixed;
+      z-index: 10;
+      right: 0;
+      top: 45px;
+    }
+    #show{
+      z-index:10;
+    }
+  </style>
+  <style type="text/css">
+    @media only screen { 
+        #map{
+          margin-top:2.813em;
+        }
+      } /* Define mobile styles */
+
+    @media only screen and (max-width: 40em) { 
+        #map{
+          margin-top:2.813em;
+        }
+        #show{
+          position: fixed;
+          bottom:0;
+          right:0;
+        }
+      } /* max-width 640px, mobile-only styles, use when QAing mobile issues */
+
+    @media only screen and (min-width: 40.063em) { 
+        #map{
+          margin-top: 9%;
+        }
+      } /* min-width 641px, medium screens */
+
+    @media only screen and (min-width: 40.063em) and (max-width: 64em) { 
+        #map{
+          margin-top: 9%;
+        }
+      } /* min-width 641px and max-width 1024px, use when QAing tablet-only issues */
+
+    @media only screen and (min-width: 64.063em) {
+      #map{
+        margin-top: 5%;
+      }
+    } /* min-width 1025px, large screens */
+
+    @media only screen and (min-width: 64.063em) and (max-width: 90em) {
+      #map{
+        margin-top: 5%;
+      }
+     } /* min-width 1025px and max-width 1440px, use when QAing large screen-only issues */
+
+    @media only screen and (min-width: 90.063em) { 
+        #map{
+          margin-top: 3%;
+        }
+      } /* min-width 1441px, xlarge screens */
+
+    @media only screen and (min-width: 90.063em) and (max-width: 120em) { 
+        #map{
+          margin-top: 3%;
+        }
+      } /* min-width 1441px and max-width 1920px, use when QAing xlarge screen-only issues */
+
+    @media only screen and (min-width: 120.063em) and (max-width: 120em) { 
+        #map{
+          margin-top: 1.5%;
+        }
+      } /* min-width 1921px, xxlarge screens */
+    /*z-index: -100;*/
+  }
+  </style>
 {% endblock %}

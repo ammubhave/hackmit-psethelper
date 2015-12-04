@@ -2,24 +2,50 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<form>
+<form method="post">
   <div class="row">
+    <br>
     <div class="large-4 columns">
       <label>Course:
-        <input type="text" name="class_for">
+         <input type="text" name="class_for" placeholder="e.g. 5.111 or STS.003">
       </label>
     </div>
   </div>
   <div class="row">
     <div class="large-4 columns">
-      <label>Starting date and time (Please use the format: yyyy/mm/dd hh:mm)
-      <input type="text" name="start_datetime">
+      <label>Location:	
+         <input type="text" name="location" placeholder="e.g. Next 3E or 32-123">
+     </label>
+    </div>
+  </div>
+  <div class="row">
+    <div class="large-8 columns">
+      <label>Starting date and time (Please use the format: yyyy-mm-dd hh:mm)
+          <input type="text" name="start_datetime" placeholder="2015-01-01 00:01">
       </label>
     </div>
-    <div class="row">
+  </div>
+  <div class="row">
+    <div class="large-8 columns">
+      <label>Predicted ending date and time (Please use the format: yyyy-mm-dd hh:mm)
+          <input type="text" name="end_datetime" placeholder="2105-01-01 00:01">
+      </label>
+    </div>
+  </div>
+  <div class="row">
+    <div class="large-12 columns">
+      <label>Description
+        <textarea name="description" placeholder="A short description of your group."></textarea>
+      </label>
+    </div>
+  </div>
+    <br>
+    <br>
+  <div class="row">
     <div class="large-4 columns">
-      <label>Predicted ending date and time (Please use the format: yyyy/mm/dd hh:mm)
-      <input type="text" name"end_datetime">
-      </label>
+        <input type="submit" class="button" value="Submit" />
     </div>
+  </div>
+  
 </form>
+{% endblock %}
